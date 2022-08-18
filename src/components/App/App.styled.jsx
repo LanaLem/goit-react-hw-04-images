@@ -3,7 +3,7 @@ import 'normalize.css';
 
 export const GlobalStyle = createGlobalStyle`
   * {
-    box-sizing: border-box;
+    box-sizing: border-box; 
   }
   body {
     margin: 0;
