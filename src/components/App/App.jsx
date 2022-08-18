@@ -34,13 +34,7 @@ export class App extends Component {
     const positiveFeedback = this.countPositiveFeedbackPercentage(good, total);
 
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexDirection="column"
-        p={4}
-      >
+      <Box pt={4}>
         <GlobalStyle />
 
         <Section title="Please leave the feedback">
