@@ -2,8 +2,9 @@ export const theme = {
   colors: {
     white: '#ffffff',
     black: '#010101',
-    green: '#4caf50',
-    red: '#831d168b',
+    green: '#009105',
+    darkRed: '#831d168b',
+    red: '#ff0000',
     blue: '#2196f3',
     pink: '#fa87d6',
     darkGrey: '#c7c5c5',
@@ -46,7 +47,6 @@ export const theme = {
     normal: '4px',
     round: '50%',
   },
-  
+
   shadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
- 
 };

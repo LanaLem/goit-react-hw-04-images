@@ -2,6 +2,7 @@ import {
   FeedbackName,
   StatisticList,
   StatisticItem,
+  IconFeedback,
 } from './Statistics.styled';
 import PropTypes from 'prop-types';
 
@@ -31,7 +32,9 @@ export const Statistics = ({
         {total}
       </StatisticItem>
       <StatisticItem>
-        <FeedbackName>Positive feedback: </FeedbackName>
+        <FeedbackName>
+          Positive feedback <IconFeedback positive={positivePercentage} />:
+        </FeedbackName>
         {positivePercentage}%
       </StatisticItem>
     </StatisticList>

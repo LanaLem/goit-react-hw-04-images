@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { HiOutlineThumbUp } from 'react-icons/hi';
 
 export const StatisticList = styled.ul`
   display: flex;
@@ -19,5 +20,27 @@ export const StatisticItem = styled.li`
 `;
 
 export const FeedbackName = styled.span`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   font-weight: ${props => props.theme.fontWeights.bold};
+`;
+
+export const IconFeedback = styled(HiOutlineThumbUp)`
+  margin-left: ${props => props.theme.space[2]}px;
+  transition-duration: 500ms;
+  transform: ${({ positive }) => {
+    if (positive < 50) {
+      return 'rotate(180deg)';
+    }
+    return 'rotate(0deg)';
+  }};
+
+  color: ${({ positive }) => {
+    if (positive < 50) {
+      return props => props.theme.colors.red;
+    }
+    return props => props.theme.colors.green;
+  }};
 `;
