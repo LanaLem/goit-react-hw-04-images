@@ -26,7 +26,7 @@ export const Searchbar = ({ handleSearchbar }) => {
       >
         <FormSearchbar>
           <ButtonForm type="submit">
-            <span>Search</span>
+            <span>Пошук</span>
           </ButtonForm>
 
           <SearchbarWrap>
@@ -35,7 +35,7 @@ export const Searchbar = ({ handleSearchbar }) => {
               type="text"
               autoComplete="off"
               autoFocus
-              placeholder="Search images and photos"
+              placeholder="Пошук зображень та фотографій"
               name="search"
             />
           </SearchbarWrap>
