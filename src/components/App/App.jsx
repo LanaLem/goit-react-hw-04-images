@@ -1,62 +1,99 @@
 import { Box } from '../../constants';
 import { GlobalStyle } from './App.styled';
-import { FeedbackOptions } from '../FeedbackOptions/FeedbackOptions';
-import { Statistics } from '../Statistics/Statistics';
-import { Section } from '../Section/Section';
-import { Notification } from 'components/Notification/Notification';
+import { Searchbar } from '../../components/Searchbar/Searchbar';
+import { ImageGallery } from '../../components/ImageGallery/ImageGallery';
+import { Loader } from '../../components/Loader/Loader';
+import { Button } from '../../components/Button/Button';
+import { fetchGallery } from '../../services/galleryApi';
 import React, { Component } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
 
 export class App extends Component {
   state = {
-    good: 0,
-    neutral: 0,
-    bad: 0,
+    search: '',
+    page: 1,
+    gallery: [],
+    status: Status.IDLE,
   };
 
-  leaveFeedback = option => {
-    this.setState(prevState => {
-      return { [option]: prevState[option] + 1 };
+  componentDidMount() {}
+
+  componentDidUpdate(prevProps, prevState) {
+    const { search, page } = this.state;
+    if (prevState.search !== search || prevState.page !== page) {
+      this.setState({ status: Status.PENDING });
+
+      fetchGallery(search, page)
+        .then(gallery => {
+          if (gallery.length === 0) {
+            this.setState({ status: Status.REJECTED });
+            toast('Вибачте, немає зображень за Вашим запитом :(');
+            return;
+          }
+
+          if (gallery.length > 0) {
+            const galleryArray = gallery.map(
+              ({ id, webformatURL, largeImageURL, tags }) => {
+                return { id, webformatURL, largeImageURL, tags };
+              }
+            );
+
+            this.setState(prevState => ({
+              gallery: [...prevState.gallery, ...galleryArray],
+              status: Status.RESOLVED,
+            }));
+          }
+        })
+        .catch(error => {
+          this.setState({ status: Status.REJECTED });
+          toast(error);
+        });
+    }
+  }
+
+  handleSearchbar = ({ search }, action) => {
+    this.setState({
+      search: search.trim(),
+      page: 1,
+      gallery: [],
+      status: Status.IDLE,
     });
+
+    action.resetForm();
   };
 
-  countTotalFeedback = (good, neutral, bad) => {
-    return bad + good + neutral;
-  };
-
-  countPositiveFeedbackPercentage = (good, total) => {
-    return Math.round((100 / total) * good);
+  handlePageChange = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
   };
 
   render() {
-    const { good, neutral, bad } = this.state;
-    const options = Object.keys(this.state);
-    const total = this.countTotalFeedback(good, neutral, bad);
-    const positiveFeedback = this.countPositiveFeedbackPercentage(good, total);
-
+    const { gallery, status } = this.state;
     return (
-      <Box pt={4}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        pb={4}
+      >
         <GlobalStyle />
 
-        <Section title="Please leave the feedback">
-          <FeedbackOptions
-            options={options}
-            onLeaveFeedback={this.leaveFeedback}
-          />
-        </Section>
-
-        <Section title="Statistics">
-          {total ? (
-            <Statistics
-              good={good}
-              neutral={neutral}
-              bad={bad}
-              total={total}
-              positivePercentage={positiveFeedback}
-            />
-          ) : (
-            <Notification message="There is no feedback"></Notification>
-          )}
-        </Section>
+        <Searchbar handleSearchbar={this.handleSearchbar} />
+        <ImageGallery gallery={gallery} />
+        {status === 'pending' && <Loader />}
+        {status === 'resolved' && gallery.length % 12 === 0 && (
+          <Button handlePageChange={this.handlePageChange} />
+        )}
+        <ToastContainer />
       </Box>
     );
   }

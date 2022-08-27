@@ -7,6 +7,7 @@ export const theme = {
     red: '#ff0000',
     blue: '#2196f3',
     pink: '#fa87d6',
+    darkPink: '#c06aa5',
     darkGrey: '#c7c5c5',
     secondaryText: '#757575',
   },
