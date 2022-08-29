@@ -4,6 +4,7 @@ import { Searchbar } from '../../components/Searchbar/Searchbar';
 import { ImageGallery } from '../../components/ImageGallery/ImageGallery';
 import { Loader } from '../../components/Loader/Loader';
 import { Button } from '../../components/Button/Button';
+import { Modal } from '../Modal/Modal';
 import { fetchGallery } from '../../services/galleryApi';
 import React, { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
@@ -21,6 +22,9 @@ export class App extends Component {
     page: 1,
     gallery: [],
     status: Status.IDLE,
+    isModalOpen: false,
+    url: '',
+    tags: '',
   };
 
   componentDidMount() {}
@@ -75,8 +79,12 @@ export class App extends Component {
     }));
   };
 
+  openModal = (url, tags) =>
+    this.setState({ isModalOpen: true, url: url, tags: tags });
+  closeModal = () => this.setState({ isModalOpen: false });
+
   render() {
-    const { gallery, status } = this.state;
+    const { gallery, status, isModalOpen, tags, url } = this.state;
     return (
       <Box
         display="flex"
@@ -86,12 +94,16 @@ export class App extends Component {
         pb={4}
       >
         <GlobalStyle />
-
         <Searchbar handleSearchbar={this.handleSearchbar} />
-        <ImageGallery gallery={gallery} />
+        {status === 'resolved' && (
+          <ImageGallery gallery={gallery} openModal={this.openModal} />
+        )}
         {status === 'pending' && <Loader />}
         {status === 'resolved' && gallery.length % 12 === 0 && (
           <Button handlePageChange={this.handlePageChange} />
+        )}
+        {isModalOpen && (
+          <Modal closeModal={this.closeModal} tags={tags} url={url} />
         )}
         <ToastContainer />
       </Box>
