@@ -95,7 +95,7 @@ export class App extends Component {
       >
         <GlobalStyle />
         <Searchbar handleSearchbar={this.handleSearchbar} />
-        {status === 'resolved' && (
+        {gallery.length > 0 && (
           <ImageGallery gallery={gallery} openModal={this.openModal} />
         )}
         {status === 'pending' && <Loader />}
