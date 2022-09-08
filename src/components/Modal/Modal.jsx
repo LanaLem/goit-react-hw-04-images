@@ -1,44 +1,39 @@
 import { Overlay, ModalForm } from './Modal.styled';
 import * as ReactDOM from 'react-dom';
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleClose);
-  }
+export const Modal = ({ url, tags, closeModal }) => {
+  useEffect(() => {
+    const handleClose = event => {
+      if (event.code === 'Escape') {
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', handleClose);
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleClose);
-  }
+    return () => {
+      window.removeEventListener('keydown', handleClose);
+    };
+  }, [closeModal]);
 
-  handleClose = event => {
-    if (event.code === 'Escape') {
-      this.props.closeModal();
-    }
-  };
-
-  onOverlayClick = event => {
+  const onOverlayClick = event => {
     if (event.currentTarget === event.target) {
-      this.props.closeModal();
+      closeModal();
     }
   };
 
-  render() {
-    const { url, tags } = this.props;
-
-    return ReactDOM.createPortal(
-      <Overlay onClick={this.onOverlayClick}>
-        <ModalForm>
-          <img src={url} alt={tags} />
-        </ModalForm>
-      </Overlay>,
-      modalRoot
-    );
-  }
-}
+  return ReactDOM.createPortal(
+    <Overlay onClick={onOverlayClick}>
+      <ModalForm>
+        <img src={url} alt={tags} />
+      </ModalForm>
+    </Overlay>,
+    modalRoot
+  );
+};
 
 Modal.propTypes = {
   url: PropTypes.string.isRequired,

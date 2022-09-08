@@ -6,7 +6,7 @@ import { Loader } from '../../components/Loader/Loader';
 import { Button } from '../../components/Button/Button';
 import { Modal } from '../Modal/Modal';
 import { fetchGallery } from '../../services/galleryApi';
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 
 const Status = {
@@ -16,97 +16,86 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-export class App extends Component {
-  state = {
-    search: '',
-    page: 1,
-    gallery: [],
-    status: Status.IDLE,
-    isModalOpen: false,
-    url: '',
-    tags: '',
-  };
+export const App = () => {
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [gallery, setGallery] = useState([]);
+  const [status, setStatus] = useState(Status.IDLE);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [url, setUrl] = useState('');
+  const [tags, setTags] = useState('');
 
-  componentDidMount() {}
+  useEffect(() => {
+    if (!search) return;
 
-  componentDidUpdate(prevProps, prevState) {
-    const { search, page } = this.state;
-    if (prevState.search !== search || prevState.page !== page) {
-      this.setState({ status: Status.PENDING });
+    setStatus(Status.PENDING);
 
-      fetchGallery(search, page)
-        .then(gallery => {
-          if (gallery.length === 0) {
-            this.setState({ status: Status.REJECTED });
-            toast('Вибачте, немає зображень за Вашим запитом :(');
-            return;
-          }
+    fetchGallery(search, page)
+      .then(gallery => {
+        if (gallery.length === 0) {
+          setStatus(Status.REJECTED);
+          toast('Вибачте, немає зображень за Вашим запитом :(');
+          return;
+        }
 
-          if (gallery.length > 0) {
-            const galleryArray = gallery.map(
-              ({ id, webformatURL, largeImageURL, tags }) => {
-                return { id, webformatURL, largeImageURL, tags };
-              }
-            );
+        if (gallery.length > 0) {
+          const galleryArray = gallery.map(
+            ({ id, webformatURL, largeImageURL, tags }) => {
+              return { id, webformatURL, largeImageURL, tags };
+            }
+          );
 
-            this.setState(prevState => ({
-              gallery: [...prevState.gallery, ...galleryArray],
-              status: Status.RESOLVED,
-            }));
-          }
-        })
-        .catch(error => {
-          this.setState({ status: Status.REJECTED });
-          toast(error);
-        });
-    }
-  }
+          setGallery(prevState => [...prevState, ...galleryArray]);
 
-  handleSearchbar = ({ search }, action) => {
-    this.setState({
-      search: search.trim(),
-      page: 1,
-      gallery: [],
-      status: Status.IDLE,
-    });
+          setStatus(Status.RESOLVED);
+        }
+      })
+      .catch(error => {
+        setStatus(Status.REJECTED);
+        toast(error);
+      });
+  }, [search, page]);
+
+  const handleSearchbar = ({ search }, action) => {
+    setSearch(search.trim());
+    setPage(1);
+    setGallery([]);
+    setStatus(Status.IDLE);
 
     action.resetForm();
   };
 
-  handlePageChange = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const handlePageChange = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  openModal = (url, tags) =>
-    this.setState({ isModalOpen: true, url: url, tags: tags });
-  closeModal = () => this.setState({ isModalOpen: false });
+  const openModal = (url, tags) => {
+    setIsModalOpen(true);
+    setUrl(url);
+    setTags(tags);
+  };
 
-  render() {
-    const { gallery, status, isModalOpen, tags, url } = this.state;
-    return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        pb={4}
-      >
-        <GlobalStyle />
-        <Searchbar handleSearchbar={this.handleSearchbar} />
-        {gallery.length > 0 && (
-          <ImageGallery gallery={gallery} openModal={this.openModal} />
-        )}
-        {status === 'pending' && <Loader />}
-        {status === 'resolved' && gallery.length % 12 === 0 && (
-          <Button handlePageChange={this.handlePageChange} />
-        )}
-        {isModalOpen && (
-          <Modal closeModal={this.closeModal} tags={tags} url={url} />
-        )}
-        <ToastContainer />
-      </Box>
-    );
-  }
-}
+  const closeModal = () => setIsModalOpen(false);
+
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      pb={4}
+    >
+      <GlobalStyle />
+      <Searchbar handleSearchbar={handleSearchbar} />
+      {gallery.length > 0 && (
+        <ImageGallery gallery={gallery} openModal={openModal} />
+      )}
+      {status === 'pending' && <Loader />}
+      {status === 'resolved' && gallery.length % 12 === 0 && (
+        <Button handlePageChange={handlePageChange} />
+      )}
+      {isModalOpen && <Modal closeModal={closeModal} tags={tags} url={url} />}
+      <ToastContainer />
+    </Box>
+  );
+};
